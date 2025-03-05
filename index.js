@@ -48,8 +48,15 @@ async function run() {
     // Mongodb Operation start
     app.post("/create-user", async (req, res) => {
       const newUser = req.body;
-      const result = await userCollection.insertOne(newUser);
-      res.send(result);
+      const existingUser = await userCollection.findOne({
+        email: newUser.email,
+      });
+      if (existingUser) {
+        res.send({ message: "User already exist, login successful" });
+      } else {
+        const result = await userCollection.insertOne(newUser);
+        res.send(result);
+      }
     });
     // Mongodb Operation end
 
