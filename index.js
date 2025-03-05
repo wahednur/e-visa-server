@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const dbUser = process.env.MDB_USER;
 const dbPass = process.env.MDB_PASS;
 // App declare
@@ -64,6 +64,20 @@ async function run() {
     app.post("/add-visa", async (req, res) => {
       const newVisa = req.body;
       const result = await visaCollection.insertOne(newVisa);
+      res.send(result);
+    });
+
+    //Get all  visa
+    app.get("/visas", async (req, res) => {
+      const result = await visaCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/visas/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await visaCollection.findOne(query);
+      console.log(result);
       res.send(result);
     });
     // Mongodb Operation end
