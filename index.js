@@ -58,6 +58,14 @@ async function run() {
         res.send(result);
       }
     });
+
+    // Add a visa
+
+    app.post("/add-visa", async (req, res) => {
+      const newVisa = req.body;
+      const result = await visaCollection.insertOne(newVisa);
+      res.send(result);
+    });
     // Mongodb Operation end
 
     await client.db("admin").command({ ping: 1 });
