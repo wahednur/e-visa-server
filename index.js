@@ -1,6 +1,6 @@
 require("dotenv").config();
-const express = require("express");
 const cors = require("cors");
+const express = require("express");
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -10,7 +10,12 @@ const dbPass = process.env.MDB_PASS;
 const app = express();
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+  ],
+  credentials: true,
   optionSuccessStatus: 200,
 };
 //Middleware
@@ -44,6 +49,7 @@ async function run() {
     //Database collections
     const userCollection = client.db("evisa").collection("users");
     const visaCollection = client.db("evisa").collection("visas");
+    const applyVisaCollection = client.db("evisa").collection("apply-visa");
 
     // Mongodb Operation start
     app.post("/create-user", async (req, res) => {
@@ -78,6 +84,26 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await visaCollection.findOne(query);
       console.log(result);
+      res.send(result);
+    });
+
+    //Update visa
+    app.patch("/vias/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const visa = req.body;
+      const query = { _id: new ObjectId(id) };
+      const option = { upset: true };
+      const updateDoc = {
+        $set: { ...visa, timestamp: Date.now() },
+      };
+      const result = await visaCollection.updateOne(query, updateDoc, option);
+      res.send(result);
+    });
+    //Applied visa
+    app.post("/visas/apply", async (req, res) => {
+      const applyVisa = req.body;
+
+      const result = await applyVisaCollection.insertOne(applyVisa);
       res.send(result);
     });
     // Mongodb Operation end
