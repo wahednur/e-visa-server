@@ -49,7 +49,7 @@ async function run() {
     //Database collections
     const userCollection = client.db("evisa").collection("users");
     const visaCollection = client.db("evisa").collection("visas");
-    const applyVisaCollection = client.db("evisa").collection("apply-visa");
+    const applyVisaCollection = client.db("evisa").collection("applyVisa");
 
     // Mongodb Operation start
     app.post("/create-user", async (req, res) => {
@@ -123,6 +123,25 @@ async function run() {
           .status(500)
           .send({ message: err.message || "Internal Server Error" });
       }
+    });
+
+    // My Applied visa
+
+    app.get("/visa/applied-visa/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log("Requested email:", email); // Check the value of email
+      const query = { email: email };
+      const result = await applyVisaCollection.find(query).toArray();
+      console.log("Query Result:", result); // Log the result from the database
+      res.send(result);
+    });
+
+    //Delete applied visa
+    app.delete("/applied-visa/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await applyVisaCollection.deleteOne(query);
+      res.send(result);
     });
     // Mongodb Operation end
 
