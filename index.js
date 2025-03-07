@@ -53,15 +53,19 @@ async function run() {
 
     // Mongodb Operation start
     app.post("/create-user", async (req, res) => {
-      const newUser = req.body;
-      const existingUser = await userCollection.findOne({
-        email: newUser.email,
-      });
-      if (existingUser) {
-        res.send({ message: "User already exist, login successful" });
-      } else {
-        const result = await userCollection.insertOne(newUser);
-        res.send(result);
+      try {
+        const newUser = req.body;
+        const existingUser = await userCollection.findOne({
+          email: newUser.email,
+        });
+        if (existingUser) {
+          res.send({ message: "User already exist, login successful" });
+        } else {
+          const result = await userCollection.insertOne(newUser);
+          res.send(result);
+        }
+      } catch (err) {
+        err.message;
       }
     });
 
@@ -83,7 +87,7 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await visaCollection.findOne(query);
-      console.log(result);
+
       res.send(result);
     });
 
@@ -101,10 +105,24 @@ async function run() {
     });
     //Applied visa
     app.post("/visas/apply", async (req, res) => {
-      const applyVisa = req.body;
+      try {
+        const applyVisa = req.body;
+        const existingVisa = await applyVisaCollection.findOne({
+          visaId: applyVisa.visaId,
+        });
 
-      const result = await applyVisaCollection.insertOne(applyVisa);
-      res.send(result);
+        if (existingVisa) {
+          return res.send({ message: "You have already applied" });
+        } else {
+          const result = await applyVisaCollection.insertOne(applyVisa);
+          return res.send(result);
+        }
+      } catch (err) {
+        console.log(err);
+        return res
+          .status(500)
+          .send({ message: err.message || "Internal Server Error" });
+      }
     });
     // Mongodb Operation end
 
